@@ -3,6 +3,7 @@ import { ErrorMessage, SuccessfulMessage } from '../../../common/utils/movimient
 import { LoginModel, UserModel } from '../models/login.model';
 import { LoginDao } from '../dao/login.dao';
 import axios from 'axios';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class LoginService {
@@ -22,8 +23,10 @@ export class LoginService {
                 mensaje: "Credenciales incorrectas",
             };
         }
-        
-        if(consulta.contrasenia !== credenciales.contrasenia){
+
+        const contraseniaCorrecta = await bcrypt.compare(credenciales.contrasenia, consulta.contrasenia);
+
+        if(!contraseniaCorrecta){
             return{
                 status: -1,
                 mensaje: "Contraseña incorrecta"
@@ -49,34 +52,28 @@ export class LoginService {
 
     try {
             
-        let registro: UserModel= await LoginDao.registrarUsuario(usuario);
         
-        // if (!consulta){
-        //     return{
-        //         status: 0,
-        //         mensaje: "Credenciales incorrectas",
-        //     };
-        // }
+        const hashedPassword = await bcrypt.hash(usuario.contrasenia, 10);
+        usuario.contrasenia = hashedPassword;
+        let registro = await LoginDao.registrarUsuario(usuario);
         
-        // if(consulta.contrasenia !== credenciales.contrasenia){
-        //     return{
-        //         status: -1,
-        //         mensaje: "Contraseña incorrecta"
-        //     };
-        // }
-        
-        // return{
-        //     status: 1,
-        //     mensaje: "Inisio de sesion exitoso",
-        //     data:{
-        //         usuario: consulta.nombre,
-        //         correo: consulta.correo
-        //     }
-        // };
+        if(!registro){
+          return{
+            status: 0,
+            mensaje: "Error al insertar regisxtro",
+          };
+
+        }
+        if(registro.insertId){
+          return{
+            status: 1,
+            mensaje: "Registro exitoso",
+          };
+        }
         
     } catch (error: any) {
       console.error('Error en LoginService:', error);
-      return `Error en LoginService- Función: consultarUsuario - ${error.message}`;
+      return `Error en LoginService- Función: registrarUsuario - ${error.message}`;
     }
   }
 

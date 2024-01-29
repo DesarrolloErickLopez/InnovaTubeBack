@@ -1,5 +1,6 @@
 import { DatabaseService } from '../../../database/services/database.service';
 import { LoginModel, UserModel } from '../models/login.model';
+import { RowDataPacket  } from 'mysql2';
 
 export class LoginDao {
     constructor() {}
@@ -30,7 +31,6 @@ export class LoginDao {
     
     console.log(usuario);
     let sql;
-    // let correo: String = credenciales.usuario;
     
     try {
 
@@ -44,13 +44,13 @@ export class LoginDao {
             usuario.contrasenia
           ];
         
-        const result = await DatabaseService.executeQuery(sql, values);
-        
-    //     return result[0];
+        const result: any = await DatabaseService.executeQuery(sql, values);
+               
+        return result;
         
     } catch (error) {
         console.error('Error en LoginDao:', error);
-        throw error;
+        // throw error;
     }
   }
 }
