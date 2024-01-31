@@ -9,7 +9,7 @@ export class YoutubeService {
     public key: string = process.env.YOUTUBE_API_KEY as string;
     public type: string = 'video';
     public part: string = 'snippet';
-    public maxResults: number = 6;
+    public maxResults: number = 10;
 
   constructor(
     ) {}
